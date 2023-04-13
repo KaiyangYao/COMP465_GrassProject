@@ -104,7 +104,7 @@ int main( void )
     //            CREATE SHADER
     // ========================================
     // Create and compile our GLSL program from the shaders
-    GLuint shaderID = load_shaders( "../assets/shaders/grass.vs", "../assets/shaders/grass.fs", "../assets/shaders/grass.gs");
+    GLuint shaderID = load_shaders( "../../assets/shaders/grass.vs", "../../assets/shaders/grass.fs", "../../assets/shaders/grass.gs");
     glUseProgram(shaderID);
     // projection matrix
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);

@@ -18,7 +18,7 @@ endif()
 add_subdirectory (external)
 
 # On Visual 2005 and above, this module can set the debug working directory
-cmake_policy(SET CMP0026 OLD)
+# cmake_policy(SET CMP0026 OLD)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/external/rpavlik-cmake-modules-fe2273")
 include(MSVCMultipleProcessCompile) 
 
@@ -27,9 +27,9 @@ if(INCLUDE_DISTRIB)
 endif(INCLUDE_DISTRIB)
 
 include_directories(
-	external/glfw-3.1.2/include/
+	external/glfw-3.3.8/include/
 	external/glm-0.9.7.1/
-	external/glew-1.13.0/include/
+	external/glew-2.1.0/include/
 	.
 )
 
