@@ -5,49 +5,42 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
-
 // Include GLEW
 #include <GL/glew.h>
-
 // Include GLFW
 #include <GLFW/glfw3.h>
-
 // Include GLM
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
 // Include shader
 #include <common/Shader.hpp>
 #include <common/stb_image.hpp>
 #define STB_IMAGE_IMPLEMENTATION
-
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 unsigned int loadTextureFromFile(const char *path);
-
 // settings
 const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
-
 
 // camera
 glm::vec3 cameraPos   = glm::vec3(0.0f, 2.0f, 3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
-
+ 
 bool firstMouse = true;
-float yaw   = -90.0f;   // yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
+float yaw   = -90.0f;  
 float pitch =  0.0f;
 float lastX =  800.0f / 2.0;
 float lastY =  600.0 / 2.0;
 float fov   =  45.0f;
-
+ 
 // timing
 float deltaTime = 0.0f; // time between current frame and last frame
 float lastFrame = 0.0f;
-
+ 
 // ****************************************
 // ****************************************
 // **               MAIN                 **
@@ -65,27 +58,22 @@ int main( void )
         getchar();
         return -1;
     }
-
+ 
     glfwWindowHint(GLFW_SAMPLES, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); //We don't want the old OpenGL
-
+ 
     // Open a window and create its OpenGL context
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Let's make some grass !", NULL, NULL);
-    if( window == NULL ){
-        fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
-        getchar();
-        glfwTerminate();
-        return -1;
-    }
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Grass Simulation!", NULL, NULL);
+
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
+ 
     // Initialize GLEW
     glewExperimental = true; // Needed for core profile
     if (glewInit() != GLEW_OK) {
@@ -94,7 +82,7 @@ int main( void )
         glfwTerminate();
         return -1;
     }
-
+ 
     // background
     glClearColor(0.215f, 0.215f, 0.215f, 1.0f);
     glfwSwapInterval(0); 
@@ -109,17 +97,17 @@ int main( void )
     // projection matrix
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
     glUniformMatrix4fv(glGetUniformLocation(shaderID, "u_projection"), 1, GL_FALSE, &projection[0][0]);
-
+ 
     // view transformation
     glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
     glUniformMatrix4fv(glGetUniformLocation(shaderID, "u_view"), 1, GL_FALSE, &view[0][0]);
-
+ 
     // ========================================
     //            CREATE POSITIONS
     // ========================================
     std::vector<glm::vec3> positions;
-    for(float x = -10.0f; x < 10.0f; x+=0.2f)
-        for(float z = -10.0f; z < 10.0f; z+=0.2f)
+    for(float x = -10.0f; x < 10.0f; x+=0.5f)
+        for(float z = -10.0f; z < 10.0f; z+=0.5f)
         {
             positions.push_back(glm::vec3(x, 0, z));
         }
@@ -128,14 +116,22 @@ int main( void )
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glBindVertexArray(VAO);
-
+ 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(glm::vec3), positions.data(), GL_STATIC_DRAW);
-
+ 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0); 
-
+ 
+    // ========================================
+    //            GENERATE TEXTURE
+    // ========================================
+    unsigned int texture1 = loadTextureFromFile("../../assets/textures/grass_texture.png");
+    glUseProgram(shaderID);
+    glUniform1i(glGetUniformLocation(shaderID, "u_texture1"), 0);
+ 
+ 
     // ========================================
     //            RENDER LOOP
     // ========================================
@@ -146,28 +142,32 @@ int main( void )
         lastFrame = currentFrame;
         // input
         processInput(window);
-
+ 
         // reset color
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
+        // bind textures
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture1);
+ 
         // update view
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
         glUniformMatrix4fv(glGetUniformLocation(shaderID, "u_view"), 1, GL_FALSE, &view[0][0]);
-
+ 
         // draw
         glUseProgram(shaderID);
         glBindVertexArray(VAO);
         glDrawArrays(GL_POINTS, 0, positions.size());
-
+ 
         // Swap buffers
         glfwSwapBuffers(window);
         glfwPollEvents();
-
+ 
         // it's dirty but it's ok to keep it simple
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     } 
     while(!glfwWindowShouldClose(window));
-
+ 
     // ========================================
     //              CLEAN UP
     // ========================================
@@ -179,15 +179,6 @@ int main( void )
 }
 
 
-
-
-
-
-
-
-
-
-
 // ****************************************
 // ****************************************
 // **            FUNCTIONS               **
@@ -197,7 +188,7 @@ void processInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-
+ 
     float cameraSpeed = 2.5 * deltaTime;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         cameraPos += cameraSpeed * cameraFront;
@@ -212,11 +203,11 @@ void processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
         cameraPos -= cameraUp * cameraSpeed;
 }
-
+ 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 { glViewport(0, 0, width, height); }
-
-
+ 
+ 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos){
     if (firstMouse)
     {
@@ -224,32 +215,32 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos){
         lastY = ypos;
         firstMouse = false;
     }
-
+ 
     float xoffset = xpos - lastX;
     float yoffset = lastY - ypos;
     lastX = xpos;
     lastY = ypos;
-
+ 
     float sensitivity = 0.1f; 
     xoffset *= sensitivity;
     yoffset *= sensitivity;
-
+ 
     yaw += xoffset;
     pitch += yoffset;
-
+ 
     if (pitch > 89.0f)
         pitch = 89.0f;
     if (pitch < -89.0f)
         pitch = -89.0f;
-
+ 
     glm::vec3 front;
     front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
     front.y = sin(glm::radians(pitch));
     front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
     cameraFront = glm::normalize(front);
 }
-
-
+ 
+ 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     fov -= (float)yoffset;
@@ -258,7 +249,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     if (fov > 45.0f)
         fov = 45.0f;
 }
-
+ 
 unsigned int loadTextureFromFile(const char *path)
 {
     //std::string filename = std::string(path);
@@ -266,7 +257,7 @@ unsigned int loadTextureFromFile(const char *path)
     
     unsigned int textureID;
     glGenTextures(1, &textureID);
-
+ 
     int width, height, nrComponents;
     stbi_set_flip_vertically_on_load(true);  
     unsigned char *data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
@@ -280,16 +271,16 @@ unsigned int loadTextureFromFile(const char *path)
             format = GL_RGB;
         else if (nrComponents == 4)
             format = GL_RGBA;
-
+ 
         glBindTexture(GL_TEXTURE_2D, textureID);
         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
-
+ 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
+ 
         stbi_image_free(data);
     }
     else
@@ -297,6 +288,6 @@ unsigned int loadTextureFromFile(const char *path)
         std::cout << "Texture failed to load at path: " << path << std::endl;
         stbi_image_free(data);
     }
-
+ 
     return textureID;
 }
