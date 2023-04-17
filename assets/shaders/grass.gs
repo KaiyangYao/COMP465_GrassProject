@@ -30,13 +30,14 @@ void createQuad(vec3 basePosition, mat4 rotationMat) {
     textCoords[2] = vec2(0.0, 1.0); // up left
     textCoords[3] = vec2(1.0, 1.0); // up right
 
-    float random = rand(basePosition.zx);
+    float random = rand(basePosition.xz);
     float randColor = mix(0, 1, random);
     float randAngle = mix(-180.0, 180.0, random);
+    float randGrassSize = mix(0.5, 1.5, random);
     mat4 randomRotationMat = rotationY(randAngle);
 
 	for(int i = 0; i < 4; i++) {
-	    gl_Position = u_projection * u_view * (gl_in[0].gl_Position + randomRotationMat * rotationMat * vertexPosition[i]);
+	    gl_Position = u_projection * u_view * (gl_in[0].gl_Position + randomRotationMat * rotationMat * (vertexPosition[i]) * randGrassSize);
         gs_out.textCoord = textCoords[i];
         gs_out.colorIndex = randColor;
 	    EmitVertex();
