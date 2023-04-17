@@ -14,12 +14,14 @@
 #include <common/Shader.hpp>
 #include <common/stb_image.hpp>
 #define STB_IMAGE_IMPLEMENTATION
+using namespace std;
+
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
-unsigned int loadTextureFromFile(const char *path);
+vector<unsigned int> loadTexturesFromFile(const vector<string> &paths);
 
 // settings
 const unsigned int SCR_WIDTH = 1920;
@@ -126,9 +128,13 @@ int main(void) {
   // ========================================
   //            GENERATE TEXTURE
   // ========================================
-  unsigned int texture1 = loadTextureFromFile("../../assets/textures/texture4.png");
+  vector<std::string> paths;
+  paths.push_back("../../assets/textures/texture2.png");
+  paths.push_back("../../assets/textures/texture8.png");
+  vector<unsigned int> textures = loadTexturesFromFile(paths);
+
   glUseProgram(shader);
-  glUniform1i(glGetUniformLocation(shader, "u_texture1"), 0);
+  
 
   // ========================================
   //            RENDER LOOP
@@ -145,8 +151,14 @@ int main(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // bind textures
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture1);
+    int temp = 0;
+    for (const auto &texture : textures) {
+      cout << "!!" << temp;
+      glActiveTexture(GL_TEXTURE0 + temp);
+      glBindTexture(GL_TEXTURE_2D, texture);
+      glUniform1i(glGetUniformLocation(shader, "texture" + temp), temp);
+      temp += 1;
+    }
 
     // update view
     glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
@@ -242,28 +254,37 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
     fov = 45.0f;
 }
 
-unsigned int loadTextureFromFile(const char *path) {
-  std::string filename = std::string(path); // directory + '/' + filename;
+vector<unsigned int> loadTexturesFromFile(const vector<string> &paths) {
+  std::vector<unsigned int> textures;
 
-  unsigned int texture;
-  glGenTextures(1, &texture);
-  glBindTexture(GL_TEXTURE_2D, texture);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  for (const auto &path : paths) {
+    std::string filename = path;
 
-  int width, height, nrComponents;
-  stbi_set_flip_vertically_on_load(true);
-  unsigned char *data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
-  stbi_set_flip_vertically_on_load(false);
-  if (data) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-  } else {
-    std::cout << "Texture failed to load at path: " << path << std::endl;
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    int width, height, nrComponents;
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char *data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
+    stbi_set_flip_vertically_on_load(false);
+    if (data) {
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+      glGenerateMipmap(GL_TEXTURE_2D);
+      textures.push_back(texture);
+    } else {
+      std::cout << "Texture failed to load at path: " << path << std::endl;
+    }
+
+    stbi_image_free(data);
   }
 
-  stbi_image_free(data);
-  return texture;
+  for (int i: textures)
+    std::cout << i << ' ';
+
+  return textures;
 }
