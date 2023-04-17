@@ -3,19 +3,26 @@ out vec4 FragColor;
 
 in GS_OUT {
     vec2 textCoord;
+	float colorIndex;
 } fs_in;
 
-uniform sampler2D texture0;
 uniform sampler2D texture1;
+uniform sampler2D texture2;
+uniform sampler2D texture3;
+uniform sampler2D texture4;
 
 void main() {
-	vec4 color1 = texture(texture0, fs_in.textCoord);
-	vec4 color2 = texture(texture1, fs_in.textCoord);
-	if (color1.a < 0.05 || color2.a < 0.05) discard; // remove the transparent areas so that our herbs are displayed correctly
-	FragColor = color2;
-	// if (fs_in.textCoord[0].x < 0.5) {
-	// 	FragColor = color1;
-	// } else {
-	// 	FragColor = color2;
-	// }
+	vec4 color;
+    if (fs_in.colorIndex < 0.25) {
+        color = texture(texture1, fs_in.textCoord);
+    } else if (fs_in.colorIndex < 0.5) {
+        color = texture(texture2, fs_in.textCoord);
+    } else if (fs_in.colorIndex < 0.75) {
+		color = texture(texture3, fs_in.textCoord);
+	} else {
+		color = texture(texture4, fs_in.textCoord);
+	}
+	
+    if (color.a < 0.05) discard;
+    FragColor = color;
 }

@@ -6,6 +6,7 @@ layout (triangle_strip, max_vertices = 36) out;
 
 out GS_OUT {
     vec2 textCoord;
+    float colorIndex;
 } gs_out;
  
 uniform mat4 u_view;
@@ -30,12 +31,14 @@ void createQuad(vec3 basePosition, mat4 rotationMat) {
     textCoords[3] = vec2(1.0, 1.0); // up right
 
     float random = rand(basePosition.zx);
-    float angle = mix(-180.0, 180.0, random);
-    mat4 randomRotationMat = rotationY(angle);
+    float randColor = mix(0, 1, random);
+    float randAngle = mix(-180.0, 180.0, random);
+    mat4 randomRotationMat = rotationY(randAngle);
 
 	for(int i = 0; i < 4; i++) {
 	    gl_Position = u_projection * u_view * (gl_in[0].gl_Position + randomRotationMat * rotationMat * vertexPosition[i]);
         gs_out.textCoord = textCoords[i];
+        gs_out.colorIndex = randColor;
 	    EmitVertex();
     }
     EndPrimitive();

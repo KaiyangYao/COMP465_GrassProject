@@ -16,7 +16,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 using namespace std;
 
-
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
@@ -108,10 +107,11 @@ int main(void) {
   //            CREATE POSITIONS
   // ========================================
   std::vector<glm::vec3> positions;
-  for (float x = -10.0f; x < 10.0f; x += 0.2f)
+  for (float x = -10.0f; x < 10.0f; x += 0.2f) {
     for (float z = -10.0f; z < 10.0f; z += 0.2f) {
       positions.push_back(glm::vec3(x, 0, z));
     }
+  }
 
   unsigned int VBO, VAO;
   glGenVertexArrays(1, &VAO);
@@ -124,17 +124,17 @@ int main(void) {
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glUseProgram(shader);
 
   // ========================================
   //            GENERATE TEXTURE
   // ========================================
   vector<std::string> paths;
   paths.push_back("../../assets/textures/texture2.png");
+  paths.push_back("../../assets/textures/texture3.png");
+  paths.push_back("../../assets/textures/texture6.png");
   paths.push_back("../../assets/textures/texture8.png");
-  vector<unsigned int> textures = loadTexturesFromFile(paths);
-
-  glUseProgram(shader);
-  
+  vector<unsigned int> texture_ids = loadTexturesFromFile(paths);
 
   // ========================================
   //            RENDER LOOP
@@ -151,13 +151,12 @@ int main(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // bind textures
-    int temp = 0;
-    for (const auto &texture : textures) {
-      cout << "!!" << temp;
-      glActiveTexture(GL_TEXTURE0 + temp);
+    int count = 0;
+    for (const auto &texture : texture_ids) {
+      glActiveTexture(GL_TEXTURE0 + count);
       glBindTexture(GL_TEXTURE_2D, texture);
-      glUniform1i(glGetUniformLocation(shader, "texture" + temp), temp);
-      temp += 1;
+      glUniform1i(glGetUniformLocation(shader, ("texture" + to_string(count)).c_str()), count);
+      count += 1;
     }
 
     // update view
@@ -255,7 +254,7 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
 }
 
 vector<unsigned int> loadTexturesFromFile(const vector<string> &paths) {
-  std::vector<unsigned int> textures;
+  vector<unsigned int> textures;
 
   for (const auto &path : paths) {
     std::string filename = path;
@@ -282,9 +281,6 @@ vector<unsigned int> loadTexturesFromFile(const vector<string> &paths) {
 
     stbi_image_free(data);
   }
-
-  for (int i: textures)
-    std::cout << i << ' ';
 
   return textures;
 }
