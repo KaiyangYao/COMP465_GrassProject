@@ -162,6 +162,7 @@ int main(void) {
     // update view
     glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
     glUniformMatrix4fv(glGetUniformLocation(shader, "u_view"), 1, GL_FALSE, &view[0][0]);
+    glUniform3fv(glGetUniformLocation(shader, "u_cameraPosition"), 1, &cameraPos[0]); 
 
     // draw
     glUseProgram(shader);
