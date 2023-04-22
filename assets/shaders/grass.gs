@@ -7,6 +7,8 @@ layout (triangle_strip, max_vertices = 36) out;
 out GS_OUT {
     vec2 textCoord;
     float colorIndex;
+    vec3 fragPos;
+    vec3 fragNormal;
 } gs_out;
  
 uniform mat4 u_view;
@@ -39,10 +41,15 @@ void createQuad(vec3 basePosition, mat4 rotationMat) {
     mat4 randomRotationMat = rotationY(randAngle);
 
 	for(int i = 0; i < 4; i++) {
-	    gl_Position = u_projection * u_view * (gl_in[0].gl_Position + randomRotationMat * rotationMat * (vertexPosition[i]) * randGrassSize);
+
+
+	    vec4 worldPosition = gl_in[0].gl_Position + randomRotationMat * rotationMat * (vertexPosition[i]) * randGrassSize;
+        gl_Position = u_projection * u_view * worldPosition;
         gs_out.textCoord = textCoords[i];
         gs_out.colorIndex = randColor;
-	    EmitVertex();
+        gs_out.fragPos = worldPosition.xyz;
+        gs_out.fragNormal = normalize(mat3(transpose(inverse(u_model))) * vec3(0.0, 0.0, 1.0));
+		EmitVertex();
     }
     EndPrimitive();
 }
