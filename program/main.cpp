@@ -130,11 +130,42 @@ int main(void) {
   //            GENERATE TEXTURE
   // ========================================
   vector<std::string> paths;
-  paths.push_back("../../assets/textures/texture2.png");
-  paths.push_back("../../assets/textures/texture3.png");
-  paths.push_back("../../assets/textures/texture6.png");
-  paths.push_back("../../assets/textures/texture8.png");
+  paths.push_back("../../assets/textures/texture1.png");
+  // paths.push_back("../../assets/textures/texture6.png");
+  // paths.push_back("../../assets/textures/texture7.png");
+  // paths.push_back("../../assets/textures/texture8.png");
+  paths.push_back("../../assets/textures/land.jpg");
   vector<unsigned int> texture_ids = loadTexturesFromFile(paths);
+
+  GLuint landShader = load_shaders("../../assets/shaders/land.vs", "../../assets/shaders/land.fs");
+  glUseProgram(landShader);
+  glUniformMatrix4fv(glGetUniformLocation(landShader, "u_projection"), 1, GL_FALSE,
+                     &projection[0][0]);
+  glUniformMatrix4fv(glGetUniformLocation(landShader, "u_view"), 1, GL_FALSE, &view[0][0]);
+
+  float landVertices[] = {
+      -10.0f, 0.0f, -10.0f, 0.0f, 0.0f, // down left
+      10.0f,  0.0f, -10.0f, 1.0f, 0.0f, // down right
+      -10.0f, 0.0f, 10.0f,  0.0f, 1.0f, // up left
+      10.0f,  0.0f, 10.0f,  1.0f, 1.0f  // up right
+  };
+
+  unsigned int landVAO, landVBO;
+  glGenVertexArrays(1, &landVAO);
+  glBindVertexArray(landVAO);
+
+  glGenBuffers(1, &landVBO);
+  glBindBuffer(GL_ARRAY_BUFFER, landVBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(landVertices), landVertices, GL_STATIC_DRAW);
+
+  // position
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
+  glEnableVertexAttribArray(0);
+  // texture
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
+
+  // unsigned int landTexture;
 
   // ========================================
   //            RENDER LOOP
@@ -155,19 +186,40 @@ int main(void) {
     for (const auto &texture : texture_ids) {
       glActiveTexture(GL_TEXTURE0 + count);
       glBindTexture(GL_TEXTURE_2D, texture);
-      glUniform1i(glGetUniformLocation(shader, ("texture" + to_string(count)).c_str()), count);
+      if (count < texture_ids.size() - 1) {
+        glUniform1i(glGetUniformLocation(shader, ("texture" + to_string(count)).c_str()), count);
+      } else {
+        glUniform1i(glGetUniformLocation(landShader, ("texture" + to_string(count)).c_str()),
+                    count);
+      }
       count += 1;
     }
 
     // update view
     glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-    glUniformMatrix4fv(glGetUniformLocation(shader, "u_view"), 1, GL_FALSE, &view[0][0]);
-    glUniform3fv(glGetUniformLocation(shader, "u_cameraPosition"), 1, &cameraPos[0]); 
+    
+
+
 
     // draw
+    glUseProgram(landShader);
+    glUniformMatrix4fv(glGetUniformLocation(shader, "u_view"), 1, GL_FALSE, &view[0][0]);
+    glUniform3fv(glGetUniformLocation(shader, "u_cameraPosition"), 1, &cameraPos[0]);
+    glUniformMatrix4fv(glGetUniformLocation(landShader, "u_view"), 1, GL_FALSE, &view[0][0]);
+    glUniform3fv(glGetUniformLocation(landShader, "u_cameraPosition"), 1, &cameraPos[0]);
+    glBindVertexArray(landVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 5);
+
     glUseProgram(shader);
+    glUniformMatrix4fv(glGetUniformLocation(shader, "u_view"), 1, GL_FALSE, &view[0][0]);
+    glUniform3fv(glGetUniformLocation(shader, "u_cameraPosition"), 1, &cameraPos[0]);
+    glUniformMatrix4fv(glGetUniformLocation(landShader, "u_view"), 1, GL_FALSE, &view[0][0]);
+    glUniform3fv(glGetUniformLocation(landShader, "u_cameraPosition"), 1, &cameraPos[0]);
     glBindVertexArray(VAO);
     glDrawArrays(GL_POINTS, 0, positions.size());
+
+    
+    
 
     // Swap buffers
     glfwSwapBuffers(window);
@@ -183,6 +235,11 @@ int main(void) {
   glDeleteVertexArrays(1, &VAO);
   glDeleteBuffers(1, &VBO);
   glDeleteProgram(shader);
+
+  glDeleteVertexArrays(1, &landVAO);
+  glDeleteBuffers(1, &landVBO);
+  glDeleteProgram(landShader);
+
   glfwTerminate();
   return 0;
 }
