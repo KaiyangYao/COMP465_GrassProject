@@ -107,8 +107,8 @@ int main(void) {
   //            CREATE POSITIONS
   // ========================================
   std::vector<glm::vec3> positions;
-  for (float x = -10.0f; x < 10.0f; x += 0.15f) {
-    for (float z = -10.0f; z < 10.0f; z += 0.15f) {
+  for (float x = -10.0f; x < 10.0f; x += 0.06f) {
+    for (float z = -10.0f; z < 10.0f; z += 0.06f) {
       positions.push_back(glm::vec3(x, 0, z));
     }
   }
@@ -130,11 +130,8 @@ int main(void) {
   //            GENERATE TEXTURE
   // ========================================
   vector<std::string> paths;
-  paths.push_back("../../assets/textures/texture1.png");
-  // paths.push_back("../../assets/textures/texture6.png");
-  // paths.push_back("../../assets/textures/texture7.png");
-  // paths.push_back("../../assets/textures/texture8.png");
-  paths.push_back("../../assets/textures/land.jpg");
+  paths.push_back("../../assets/textures/grass.png");
+  paths.push_back("../../assets/textures/land2.png");
   vector<unsigned int> texture_ids = loadTexturesFromFile(paths);
 
   GLuint landShader = load_shaders("../../assets/shaders/land.vs", "../../assets/shaders/land.fs");
@@ -144,11 +141,18 @@ int main(void) {
   glUniformMatrix4fv(glGetUniformLocation(landShader, "u_view"), 1, GL_FALSE, &view[0][0]);
 
   float landVertices[] = {
+      // Vertices           // Textures
       -10.0f, 0.0f, -10.0f, 0.0f, 0.0f, // down left
       10.0f,  0.0f, -10.0f, 1.0f, 0.0f, // down right
       -10.0f, 0.0f, 10.0f,  0.0f, 1.0f, // up left
       10.0f,  0.0f, 10.0f,  1.0f, 1.0f  // up right
   };
+
+  float repeatFactor = 100.0f;
+  for (int i = 0; i < 4; i++) {
+    landVertices[i * 5 + 3] *= repeatFactor;
+    landVertices[i * 5 + 4] *= repeatFactor;
+  }
 
   unsigned int landVAO, landVBO;
   glGenVertexArrays(1, &landVAO);
@@ -164,8 +168,6 @@ int main(void) {
   // texture
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
-
-  // unsigned int landTexture;
 
   // ========================================
   //            RENDER LOOP
@@ -197,9 +199,6 @@ int main(void) {
 
     // update view
     glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-    
-
-
 
     // draw
     glUseProgram(landShader);
@@ -208,7 +207,7 @@ int main(void) {
     glUniformMatrix4fv(glGetUniformLocation(landShader, "u_view"), 1, GL_FALSE, &view[0][0]);
     glUniform3fv(glGetUniformLocation(landShader, "u_cameraPosition"), 1, &cameraPos[0]);
     glBindVertexArray(landVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 5);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
     glUseProgram(shader);
     glUniformMatrix4fv(glGetUniformLocation(shader, "u_view"), 1, GL_FALSE, &view[0][0]);
@@ -217,9 +216,6 @@ int main(void) {
     glUniform3fv(glGetUniformLocation(landShader, "u_cameraPosition"), 1, &cameraPos[0]);
     glBindVertexArray(VAO);
     glDrawArrays(GL_POINTS, 0, positions.size());
-
-    
-    
 
     // Swap buffers
     glfwSwapBuffers(window);

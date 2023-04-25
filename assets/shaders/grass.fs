@@ -9,9 +9,6 @@ in GS_OUT {
 } fs_in;
 
 uniform sampler2D texture0;
-uniform sampler2D texture1;
-uniform sampler2D texture2;
-uniform sampler2D texture3;
 
 vec3 lightPos = vec3(0.0, 0.0, 0.0);
 vec3 lightColor = vec3(1.0, 1.0, 1.0);
@@ -21,17 +18,23 @@ float shininess = 30.0;
 
 void main() {
 	vec4 color;
-    if (fs_in.colorIndex < 0.25) {
-        color = texture(texture0, fs_in.textCoord);
-    } else if (fs_in.colorIndex < 0.5) {
-        color = texture(texture1, fs_in.textCoord);
-    } else if (fs_in.colorIndex < 0.75) {
-		color = texture(texture2, fs_in.textCoord);
-	} else {
-		color = texture(texture3, fs_in.textCoord);
-	}
+    // if (fs_in.colorIndex < 0.25) {
+    //     color = texture(texture0, fs_in.textCoord);
+    // } else if (fs_in.colorIndex < 0.5) {
+    //     color = texture(texture1, fs_in.textCoord);
+    // } else if (fs_in.colorIndex < 0.75) {
+	// 	color = texture(texture2, fs_in.textCoord);
+	// } else {
+	// 	color = texture(texture3, fs_in.textCoord);
+	// }
+	// if (fs_in.colorIndex < 0.8) {
+	// 	color = texture(texture1, fs_in.textCoord);
+	// } else {
+	// 	color = texture(texture2, fs_in.textCoord);
+	// }
+	color = texture(texture0, fs_in.textCoord);
 	
-    if (color.a < 0.05) discard;
+    if (color.a < 0.6) discard;
     // Compute the diffuse lighting contribution
 	vec3 ambient = ambientStrength * lightColor;
 	vec3 lightDir = normalize(lightPos - fs_in.fragPos);
@@ -47,5 +50,6 @@ void main() {
 	// Combine the lighting and texture color
 	vec3 result = (ambient + diffuse + specular) * color.rgb;
     FragColor = vec4(result, color.a);
+	FragColor = color;
     
 }
