@@ -8,7 +8,7 @@ in GS_OUT {
     vec3 fragNormal;
 } fs_in;
 
-uniform sampler2D texture0;
+uniform sampler2D u_grassTexture1;
 
 vec3 lightPos = vec3(0.0, 0.0, 0.0);
 vec3 lightColor = vec3(1.0, 1.0, 1.0);
@@ -33,7 +33,7 @@ void main() {
 	// 	color = texture(texture1, fs_in.textCoord);
 	// }
 	
-	color = texture(texture0, fs_in.textCoord);
+	color = texture(u_grassTexture1, fs_in.textCoord);
 	
     if (color.a < 0.6) discard;
     // Compute the diffuse lighting contribution
