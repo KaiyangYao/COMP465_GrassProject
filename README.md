@@ -1,5 +1,6 @@
 
 #  **Grass Real-Time Rendering with Wind**
+Author: Kaiyang Yao, Shengyuan Wang
 
 ### **[Project Log](https://docs.google.com/document/d/1lhBNQFNMpAo0fFtIDtezeUoxU2dB6yr0HxkB_vA13ak/edit)**
 
