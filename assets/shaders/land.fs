@@ -6,5 +6,9 @@ out vec4 FragColor;
 uniform sampler2D texture1;
 
 void main() { 
-	FragColor = texture(texture1, TexCoord); 
+	vec4 color = texture(texture1, TexCoord); 
+	// Decrease the saturation of the texture.
+	float saturationFactor = 0.5;
+	color.rgb *= saturationFactor;
+	FragColor = color;
 }

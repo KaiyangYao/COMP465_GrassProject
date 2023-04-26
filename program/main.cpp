@@ -132,7 +132,7 @@ int main(void) {
   vector<std::string> paths;
   paths.push_back("../../assets/textures/grass.png");
   // paths.push_back("../../assets/textures/flower4.png");
-  paths.push_back("../../assets/textures/land2.png");
+  paths.push_back("../../assets/textures/land3.png");
   vector<unsigned int> texture_ids = loadTexturesFromFile(paths);
 
   GLuint landShader = load_shaders("../../assets/shaders/land.vs", "../../assets/shaders/land.fs");
