@@ -131,6 +131,7 @@ int main(void) {
   // ========================================
   vector<std::string> paths;
   paths.push_back("../../assets/textures/grass.png");
+  // paths.push_back("../../assets/textures/flower4.png");
   paths.push_back("../../assets/textures/land2.png");
   vector<unsigned int> texture_ids = loadTexturesFromFile(paths);
 
@@ -169,6 +170,27 @@ int main(void) {
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
 
+  GLenum err;
+    while ((err = glGetError()) != GL_NO_ERROR) {
+      cout << err << endl;
+    }
+
+  // bind textures
+  int count = 0;
+  for (const auto &texture : texture_ids) {
+    glActiveTexture(GL_TEXTURE0 + count);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    GLenum err;
+    if (count < texture_ids.size() - 1) {
+      glUseProgram(shader);
+      glUniform1i(glGetUniformLocation(shader, ("texture" + to_string(count)).c_str()), count);
+    } else {
+      glUseProgram(landShader);
+      glUniform1i(glGetUniformLocation(landShader, ("texture" + to_string(count)).c_str()), count);
+    }
+    count += 1;
+  }
+
   // ========================================
   //            RENDER LOOP
   // ========================================
@@ -182,20 +204,6 @@ int main(void) {
 
     // reset color
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    // bind textures
-    int count = 0;
-    for (const auto &texture : texture_ids) {
-      glActiveTexture(GL_TEXTURE0 + count);
-      glBindTexture(GL_TEXTURE_2D, texture);
-      if (count < texture_ids.size() - 1) {
-        glUniform1i(glGetUniformLocation(shader, ("texture" + to_string(count)).c_str()), count);
-      } else {
-        glUniform1i(glGetUniformLocation(landShader, ("texture" + to_string(count)).c_str()),
-                    count);
-      }
-      count += 1;
-    }
 
     // update view
     glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);

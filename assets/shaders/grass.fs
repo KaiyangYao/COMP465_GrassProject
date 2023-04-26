@@ -27,11 +27,12 @@ void main() {
 	// } else {
 	// 	color = texture(texture3, fs_in.textCoord);
 	// }
-	// if (fs_in.colorIndex < 0.8) {
-	// 	color = texture(texture1, fs_in.textCoord);
+	// if (fs_in.colorIndex < 0.95) {
+	// 	color = texture(texture0, fs_in.textCoord);
 	// } else {
-	// 	color = texture(texture2, fs_in.textCoord);
+	// 	color = texture(texture1, fs_in.textCoord);
 	// }
+	
 	color = texture(texture0, fs_in.textCoord);
 	
     if (color.a < 0.6) discard;
@@ -49,7 +50,6 @@ void main() {
 	
 	// Combine the lighting and texture color
 	vec3 result = (ambient + diffuse + specular) * color.rgb;
-    FragColor = vec4(result, color.a);
+    // FragColor = vec4(result, color.a);
 	FragColor = color;
-    
 }
