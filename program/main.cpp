@@ -109,11 +109,19 @@ int main(void) {
 
   // Create Positions
   std::vector<glm::vec3> positions;
-  for (float x = -10.0f; x < 10.0f; x += 0.06f) {
-    for (float z = -10.0f; z < 10.0f; z += 0.06f) {
-      positions.push_back(glm::vec3(x, -1, z));
-    }
+  // for (float x = -10.0f; x < 10.0f; x += 0.06f) {
+  //   for (float z = -10.0f; z < 10.0f; z += 0.06f) {
+  //     positions.push_back(glm::vec3(x, -1, z));
+  //   }
+  // }
+
+  // For Testing (Limit to 1*1)
+  for (float x = -2.0f ; x < 2.0f; x += 0.06f) {
+      for (float z = -2.0f; z < 2.0f; z += 0.06f) {
+          positions.push_back(glm::vec3(x, -1, z));
+      }
   }
+  
 
   unsigned int VBO, VAO;
   glGenVertexArrays(1, &VAO);
@@ -218,16 +226,26 @@ int main(void) {
   faces.push_back("../../assets/textures/skybox/grass_back.png");
   unsigned int skyboxTexture = loadCubemap(faces);
 
+
+
+  /***************************************
+   * Wind Textures
+   ***************************************/
+  unsigned int windTexture = loadTexture("../../assets/textures/wind.png");
+  glUseProgram(shader);
+  glUniform1i(glGetUniformLocation(shader, "u_grassWindSim"), textureCount++);
+
   /***************************************
    * Bind Textures
    ***************************************/
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, grassTexture1);
+  // glBindTexture(GL_TEXTURE_2D, windTexture);
   glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D, landTexture);
   glActiveTexture(GL_TEXTURE2);
   glBindTexture(GL_TEXTURE_2D, skyboxTexture);
-
+  
   /***************************************
    * Render Loop
    ***************************************/
@@ -268,6 +286,7 @@ int main(void) {
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
     glUseProgram(shader);
+    glUniform1f(glGetUniformLocation(shader, "u_time"), glfwGetTime()); 
     glUniformMatrix4fv(glGetUniformLocation(shader, "u_view"), 1, GL_FALSE, &view[0][0]);
     glUniform3fv(glGetUniformLocation(shader, "u_cameraPosition"), 1, &cameraPos[0]);
     glUniformMatrix4fv(glGetUniformLocation(landShader, "u_view"), 1, GL_FALSE, &view[0][0]);

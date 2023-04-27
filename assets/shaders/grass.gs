@@ -13,11 +13,17 @@ uniform mat4 u_view;
 uniform mat4 u_projection;
 uniform mat4 u_model;
 uniform vec3 u_cameraPosition;
+uniform float u_time;
+uniform sampler2D u_wind;
 
 mat4 rotationY(in float angle);
+mat4 rotationX(in float angle);
+mat4 rotationZ(in float angle);
 float rand(vec2 co);
+
+const float pi = 3.14;
  
-void createQuad(vec3 basePosition) {
+void createQuad(vec3 basePosition, mat4 dir) {
     // Create the quad of points relative to the base position.
 	vec4 vertexPosition[4];
 	vertexPosition[0] = vec4(-0.2, 0.0, 0.0, 0.0); 	// down left
@@ -38,8 +44,21 @@ void createQuad(vec3 basePosition) {
     float randGrassSize = mix(0.5, 1.5, random);
     mat4 randomRotationMat = rotationY(randAngle);
 
+    // wind
+
+	vec2 w_direction = vec2(0.5, 0.5); 
+	float w_strength = 0.05f;
+	vec2 uv = basePosition.xz + w_direction * w_strength * u_time ;
+	uv.x = mod(uv.x,1.0);
+	uv.y = mod(uv.y,1.0);
+	vec4 w = texture(u_wind, uv);
+	mat4 wind_effect =  (rotationX(w.x*pi*0.75f - pi*0.25f) * rotationZ(w.y*pi*0.75f - pi*0.25f));
+	mat4 wind_apply = mat4(1);
+
 	for(int i = 0; i < 4; i++) {
-	    vec4 worldPosition = gl_in[0].gl_Position + randomRotationMat * (vertexPosition[i]) * randGrassSize;
+		// only apply effect on the top of texture
+		if (i == 2) wind_apply = wind_effect;
+	    vec4 worldPosition = gl_in[0].gl_Position + wind_apply * dir * randomRotationMat * (vertexPosition[i]) * randGrassSize;
         gl_Position = u_projection * u_view * worldPosition;
         gs_out.textCoord = textCoords[i];
         gs_out.colorIndex = randColor;
@@ -52,11 +71,26 @@ void createQuad(vec3 basePosition) {
 
 
 // ------------------------------- UITLS -------------------------------
-mat4 rotationY(in float angle) {
-	return mat4(cos(angle),		0,		sin(angle),	    0,
-			 		0,		    1.0,		0,	        0,
-				-sin(angle),	0,		cos(angle),	    0,
-					0, 		    0,			0,	        1);
+mat4 rotationX( in float angle ) {
+	return mat4(	1.0,		0,			0,			0,
+			 		0, 	cos(angle),	-sin(angle),		0,
+					0, 	sin(angle),	 cos(angle),		0,
+					0, 			0,			  0, 		1);
+}
+
+mat4 rotationY( in float angle )
+{
+	return mat4(	cos(angle),		0,		sin(angle),	0,
+			 				0,		1.0,			 0,	0,
+					-sin(angle),	0,		cos(angle),	0,
+							0, 		0,				0,	1);
+}
+
+mat4 rotationZ( in float angle ) {
+	return mat4(	cos(angle),		-sin(angle),	0,	0,
+			 		sin(angle),		cos(angle),		0,	0,
+							0,				0,		1,	0,
+							0,				0,		0,	1);
 }
 
 // simple pseudo-random number generator to generate a random number between 0 and 1.
@@ -66,8 +100,15 @@ float rand(vec2 co) {
 
 // helper to create grass based on the num of quads.
 void createGrass(int numQuads) {
-	for (int i = 0; i < numQuads; i++) {
-		createQuad(gl_in[0].gl_Position.xyz);
+	if (numQuads == 3) {
+		createQuad(gl_in[0].gl_Position.xyz, rotationY(0));
+		createQuad(gl_in[0].gl_Position.xyz, rotationY(pi/3));
+		createQuad(gl_in[0].gl_Position.xyz, rotationY(-pi/3));
+	} else if (numQuads == 2) {
+		createQuad(gl_in[0].gl_Position.xyz, rotationY(0));
+		createQuad(gl_in[0].gl_Position.xyz, rotationY(pi/2));
+	} else if (numQuads == 1) {
+		createQuad(gl_in[0].gl_Position.xyz, rotationY(0));
 	}
 }
 // ---------------------------------------------------------------------
@@ -75,9 +116,9 @@ void createGrass(int numQuads) {
 
 void main() {
 	// LOD distance definations
-	const float LOD1 = 2.0f;
-	const float LOD2 = 5.0f;
-	const float LOD3 = 10.0f;
+	const float LOD1 = 1.0f;
+	const float LOD2 = 2.0f;
+	const float LOD3 = 4.0f;
 
 	float dist = length(gl_in[0].gl_Position.xyz - u_cameraPosition);
 
