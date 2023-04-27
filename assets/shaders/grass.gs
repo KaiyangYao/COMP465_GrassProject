@@ -14,16 +14,15 @@ uniform mat4 u_projection;
 uniform mat4 u_model;
 uniform vec3 u_cameraPosition;
 uniform float u_time;
-uniform sampler2D u_wind;
+
 
 mat4 rotationY(in float angle);
 mat4 rotationX(in float angle);
 mat4 rotationZ(in float angle);
 float rand(vec2 co);
 
-const float pi = 3.14;
- 
-void createQuad(vec3 basePosition, mat4 dir) {
+const float pi = 3.1415926;
+void createQuad(vec3 basePosition) {
     // Create the quad of points relative to the base position.
 	vec4 vertexPosition[4];
 	vertexPosition[0] = vec4(-0.2, 0.0, 0.0, 0.0); 	// down left
@@ -44,21 +43,19 @@ void createQuad(vec3 basePosition, mat4 dir) {
     float randGrassSize = mix(0.5, 1.5, random);
     mat4 randomRotationMat = rotationY(randAngle);
 
-    // wind
+    // Add Wind Effect
+    float windStrength = 2; // Set wind strength
+    float windFrequency = 20; // Set wind frequency
+    float windAngle = cos(radians(u_time * windFrequency))/(10/pi); // Set wind angle
+    vec3 windDirection = vec3(1.0, 0.0, 1.0); // Set wind direction
+    mat4 windTranslationMat =  (rotationX( windAngle *windDirection[0]) * rotationZ(windAngle * windDirection[2])); // Change the wind angle into matrix form
+ 
 
-	vec2 w_direction = vec2(0.5, 0.5); 
-	float w_strength = 0.05f;
-	vec2 uv = basePosition.xz + w_direction * w_strength * u_time ;
-	uv.x = mod(uv.x,1.0);
-	uv.y = mod(uv.y,1.0);
-	vec4 w = texture(u_wind, uv);
-	mat4 wind_effect =  (rotationX(w.x*pi*0.75f - pi*0.25f) * rotationZ(w.y*pi*0.75f - pi*0.25f));
-	mat4 wind_apply = mat4(1);
 
 	for(int i = 0; i < 4; i++) {
-		// only apply effect on the top of texture
-		if (i == 2) wind_apply = wind_effect;
-	    vec4 worldPosition = gl_in[0].gl_Position + wind_apply * dir * randomRotationMat * (vertexPosition[i]) * randGrassSize;
+		mat4 windEffect = mat4(1.0);
+		if (i==2) windEffect = windTranslationMat; 
+	    vec4 worldPosition = gl_in[0].gl_Position + windEffect * randomRotationMat * (vertexPosition[i]) * randGrassSize;
         gl_Position = u_projection * u_view * worldPosition;
         gs_out.textCoord = textCoords[i];
         gs_out.colorIndex = randColor;
@@ -100,15 +97,8 @@ float rand(vec2 co) {
 
 // helper to create grass based on the num of quads.
 void createGrass(int numQuads) {
-	if (numQuads == 3) {
-		createQuad(gl_in[0].gl_Position.xyz, rotationY(0));
-		createQuad(gl_in[0].gl_Position.xyz, rotationY(pi/3));
-		createQuad(gl_in[0].gl_Position.xyz, rotationY(-pi/3));
-	} else if (numQuads == 2) {
-		createQuad(gl_in[0].gl_Position.xyz, rotationY(0));
-		createQuad(gl_in[0].gl_Position.xyz, rotationY(pi/2));
-	} else if (numQuads == 1) {
-		createQuad(gl_in[0].gl_Position.xyz, rotationY(0));
+	for (int i = 0; i < numQuads; i++) {
+		createQuad(gl_in[0].gl_Position.xyz);
 	}
 }
 // ---------------------------------------------------------------------
@@ -127,9 +117,9 @@ void main() {
 	dist += randomFactor * mix(-1, 1, rand(gl_in[0].gl_Position.xz));
 
 	// change number of quad function of distance
-	int numQuads = 3;
-	if (dist > LOD1) numQuads = 2;
-	if (dist > LOD2) numQuads = 1;
+	int numQuads = 7;
+	if (dist > LOD1) numQuads = 5;
+	if (dist > LOD2) numQuads = 3;
 	if (dist > LOD3) numQuads = 0;
 	
 	createGrass(numQuads);
