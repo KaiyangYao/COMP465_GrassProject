@@ -43,8 +43,10 @@ When creating a geometric mesh for billboard rendering, the first step is to det
 - **Adding Grass Texture**:  
 The next step involves applying the grass texture overlay onto the boxes to render the grass on the screen. However, simply overlaying the texture onto each box is not adequate to produce a realistic-looking scene. Therefore, we need to make certain modifications. One potential solution is rotating billboards to generate multiple copies of the grass texture with various orientations. By repeating this process, we can create several grass quads in the same space with different directions, contributing to a more natural-looking environment.
 
-### **Wind Simulation**:
+### **Wind Simulation**:  
+To add wind effect to a grass simulation using a geometry shader, the first step is to define the wind strength, frequency, direction, and angle parameters. The wind angle is calculated based on the current time and frequency, and used to generate a transformation matrix for rotating the grass blades.
 
+Next, for each vertex of the grass blades, a random rotation matrix is generated, and the vertex is rotated and scaled by the random matrix, the wind translation matrix, and a random grass size. The resulting world position is transformed to screen space and passed to the fragment shader along with texture coordinates, color index, fragment position, and normal.
 ### **Future Work**:
 This project has the potential for further development in the future to enhance the realism and interactivity of the grass rendering simulation. Here are some potential areas for investigation:
 
@@ -64,3 +66,9 @@ We would like to express our sincere gratitude to Bret Jackson for the support a
 
 
 ### **References**:
+[1] Kévin Boulanger, Sumanta N Pattanaik, and Kadi Bouatouch. “Rendering grass in real-time with dynamic light sources and shadows”. In: (2006).  
+[2] Neyret F. “Synthesizing verdant landscapes using volumetric textures”. In: Euro- graphics Rendering Workshop (1996), pp. 215–224.  
+[3] Tan Kim Heok and Daut Daman. “A review on level of detail”. In: Proceedings. International Conference on Computer Graphics, Imaging and Visualization, 2004. CGIV 2004. IEEE. 2004, pp. 70–75.  
+[4] Neyret F Meyer A. “Interactive volumetric textures”. In: Eurographics Rendering Workshop (1998), pp. 157–168.  
+[5] Balu R. Reeves W. “Approximate and probabilistic algorithms from shading and rendering structured partical systems”. In: Computer Graphics 19.3 (1985), pp. 312–322.  
+[6] Changbo Wang et al. “Dynamic modeling and rendering of grass wagging in wind”. In: Computer Animation and Virtual Worlds 16.3-4 (2005), pp. 377–389.  
