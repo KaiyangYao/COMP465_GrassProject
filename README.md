@@ -4,14 +4,12 @@ Author: Kaiyang Yao, Shengyuan Wang
 
 
 ### **Introduction**:
-In this project, we create a realistic and visually appealing simulation of grass using OpenGL, which have a variety of potential application both in video games and virtual reality experiences. It involve the use of billboarding method, grass simulation, and wind simulation to create a realistic and dynamic grass landscape.
+In this project, we created a realistic and visually appealing simulation of grass using OpenGL, which has a variety of potential applications both in video games and virtual reality experiences. We utilized the billboarding method, grass simulation, and wind simulation to create a realistic grass landscape.
 
 ### **Requirements**:
 To run this project, you need the following:
 - C++ compiler
-- OpengGL library
-- GLFW library
-- GLM library
+- A tool that generates build files. We use CMake
 
 ### **Installation**:
 To install and run the project, you should following these steps:
@@ -27,7 +25,7 @@ cmake-gui ..
 ### **Usage**
 
 Once you have installed and run the project, you can use the following controls:
-- WASD keys to move the camera
+- WSAD keys to control the directions, space, shift to move camera up or down
 - Mouse to look around
 
 
@@ -35,18 +33,25 @@ Once you have installed and run the project, you can use the following controls:
 
 ### **Grass Simulation**:
 
-Billboard rendering utilizes a two-stage approach. The first stage involves constructing a simple geometric mesh comprising rectangular shapes using two triangles as building blocks. The second stage involves applying the grass texture to each rectangle in the mesh, providing the appearance of grass blades.
+To do the billboard rendering, we employed a two-stage approach for billboard rendering. In the first stage, we use triangles to create multiple basic rectangular geometric meshes. In the second stage, we mapped the grass texture onto each rectangle in the mesh to give the impression of individual grass blades.
 
 - **Creating Geometry Mesh**:  
-When creating a geometric mesh for billboard rendering, the first step is to determine the position of each rectangle box within the 3D environment. We add a base point for each rectangle box, serving as a reference point to generate the boxes. After establishing the base points, we move to the next step to generate a rectangle box for each reference point. To create a rectangle box, we need to establish four additional points that define the dimensions of the box. These points are typically located at the corners of the rectangle box and are calculated based on the width and height of the box. Once we have calculated the position of each corner point, we can append them to the vertex array for rendering purposes.
+When creating a geometric mesh for billboard rendering, the first step involves determining the position of each rectangle box within the 3D environment. To accomplish this, we first establish a base point for each rectangle box, which serves as a reference point for generating the boxes. Once the base points are determined, we move on to the next step of generating a rectangle box for each reference point.
+
+To create a rectangle box, we need to establish four additional points that define the dimensions of the box. These points are typically located at the corners of the rectangle box and are calculated based on the width and height of the box. Once we have calculated the position of each corner point, we can add them to the vertex array for rendering purposes.
 
 - **Adding Grass Texture**:  
-The next step involves applying the grass texture overlay onto the boxes to render the grass on the screen. However, simply overlaying the texture onto each box is not adequate to produce a realistic-looking scene. Therefore, we need to make certain modifications. One potential solution is rotating billboards to generate multiple copies of the grass texture with various orientations. By repeating this process, we can create several grass quads in the same space with different directions, contributing to a more natural-looking environment.
+
+The next step in the billboard rendering process is to apply the grass texture overlay onto the boxes to generate the appearance of grass on the screen. However, simply overlaying the texture onto each box is not enough to create a realistic-looking scene. Thus, modifications are required to achieve the desired effect.
+
+One potential solution is to rotate the billboards to create multiple copies of the grass texture with different orientations. By repeating this process, we can generate several grass quads within the same space, each with a different direction. This technique contributes to a more natural-looking environment and helps to enhance the overall realism of the scene.
 
 ### **Wind Simulation**:  
-To add wind effect to a grass simulation using a geometry shader, the first step is to define the wind strength, frequency, direction, and angle parameters. The wind angle is calculated based on the current time and frequency, and used to generate a transformation matrix for rotating the grass blades.
 
-Next, for each vertex of the grass blades, a random rotation matrix is generated, and the vertex is rotated and scaled by the random matrix, the wind translation matrix, and a random grass size. The resulting world position is transformed to screen space and passed to the fragment shader along with texture coordinates, color index, fragment position, and normal.
+To introduce a wind effect to a grass simulation using a geometry shader, we first define several parameters such as wind strength, frequency, direction, and angle. The wind angle is then calculated based on the current time and frequency, which is then used to generate a transformation matrix for rotating the grass blades.
+
+Next, for each vertex of the grass blades, a random rotation matrix is generated. The vertex is then rotated and scaled by the random matrix, the wind translation matrix, and a random grass size. The resulting world position is transformed into screen space and passed to the fragment shader along with additional information, including texture coordinates, color index, fragment position, and normal.
+
 ### **Future Work**:
 This project has the potential for further development in the future to enhance the realism and interactivity of the grass rendering simulation. Here are some potential areas for investigation:
 
@@ -62,7 +67,7 @@ Our current approach uses a simple sine wave function to generate wind patterns,
 
 ### **Acknowledgements**:
 
-We would like to express our sincere gratitude to Bret Jackson for the support and guidance throughout the project. The help in debugging was particularly appreeciated and played a critical role in achieving our project goals. The valuable insights and feedback provided also helped us to identify areas for improvement, which we will continue to work in the future. Thank you once again for your unwavering support!
+We would like to express our sincere gratitude to Professor Bret Jackson for the support and guidance throughout the project. The help in debugging was particularly appreeciated and played a critical role in achieving our project goals. The valuable insights and feedback provided also helped us to identify areas for improvement, which we will continue to work in the future. Thank you once again for your unwavering support!
 
 
 ### **References**:
