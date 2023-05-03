@@ -6,6 +6,8 @@ Author: Kaiyang Yao, Shengyuan Wang
 ### **Introduction**:
 In this project, we created a realistic and visually appealing simulation of grass using OpenGL, which has a variety of potential applications both in video games and virtual reality experiences. We utilized the billboarding method, grass simulation, and wind simulation to create a realistic grass landscape.
 
+![](assets/images/grass.gif)
+
 ### **Requirements**:
 To run this project, you need the following:
 - C++ compiler
