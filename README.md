@@ -55,13 +55,13 @@ Next, for each vertex of the grass blades, a random rotation matrix is generated
 ## **Future Work**
 This project has the potential for further development in the future to enhance the realism and interactivity of the grass rendering simulation. Here are some potential areas for investigation:
 
-- **Advanced shadowing animation techniques**
+- **Advanced shadowing animation techniques**:
 Currently, the simulation only accounts for the movement of the sun and the resulting shadow patterns. However, shadows cast by nearby objects such as trees or buildings could be simulated, and the interaction between the grass and these shadows could be more accurately modeled. This would create a more immersive and dynamic environment for users to explore.
 
-- **Research into other wind simulation methods**
+- **Research into other wind simulation methods**:
 Our current approach uses a simple sine wave function to generate wind patterns, but other techniques could be explored, such as fluid dynamics simulations. This would result in a more natural and fluid movement of the grass, enhancing the realism of the simulation.
 
-- **Collision detection with other objects**
+- **Collision detection with other objects**:
  The grass is currently simulated as if it exists in a vacuum, with no interaction with other objects in the environment. By implementing collision detection algorithms, the grass could interact with other objects such as rocks, trees, and buildings. This would create a more dynamic and interactive environment, opening up new possibilities in video games and other applications.
 
 
