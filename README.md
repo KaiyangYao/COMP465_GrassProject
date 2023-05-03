@@ -2,8 +2,7 @@
 #  **Grass Real-Time Rendering with Wind**
 Author: Kaiyang Yao, Shengyuan Wang
 
-
-### **Introduction**:
+## **Introduction**:
 In this project, we created a realistic and visually appealing simulation of grass using OpenGL, which has a variety of potential applications both in video games and virtual reality experiences. We utilized the billboarding method, grass simulation, and wind simulation to create a realistic grass landscape.
 
 ![](assets/images/grass.gif)
@@ -23,7 +22,6 @@ mkdir build
 cd build
 cmake-gui ..
 ```
-
 ### **Usage**
 
 Once you have installed and run the project, you can use the following controls:
@@ -54,7 +52,7 @@ To introduce a wind effect to a grass simulation using a geometry shader, we fir
 
 Next, for each vertex of the grass blades, a random rotation matrix is generated. The vertex is then rotated and scaled by the random matrix, the wind translation matrix, and a random grass size. The resulting world position is transformed into screen space and passed to the fragment shader along with additional information, including texture coordinates, color index, fragment position, and normal.
 
-### **Future Work**:
+## **Future Work**:
 This project has the potential for further development in the future to enhance the realism and interactivity of the grass rendering simulation. Here are some potential areas for investigation:
 
 - **Advanced shadowing animation techniques**:   
@@ -67,12 +65,12 @@ Our current approach uses a simple sine wave function to generate wind patterns,
  The grass is currently simulated as if it exists in a vacuum, with no interaction with other objects in the environment. By implementing collision detection algorithms, the grass could interact with other objects such as rocks, trees, and buildings. This would create a more dynamic and interactive environment, opening up new possibilities in video games and other applications.
 
 
-### **Acknowledgements**:
+## **Acknowledgements**:
 
 We would like to express our sincere gratitude to Professor Bret Jackson for the support and guidance throughout the project. The help in debugging was particularly appreeciated and played a critical role in achieving our project goals. The valuable insights and feedback provided also helped us to identify areas for improvement, which we will continue to work in the future. Thank you once again for your unwavering support!
 
 
-### **References**:
+## **References**:
 [1] Kévin Boulanger, Sumanta N Pattanaik, and Kadi Bouatouch. “Rendering grass in real-time with dynamic light sources and shadows”. In: (2006).  
 [2] Neyret F. “Synthesizing verdant landscapes using volumetric textures”. In: Euro- graphics Rendering Workshop (1996), pp. 215–224.  
 [3] Tan Kim Heok and Daut Daman. “A review on level of detail”. In: Proceedings. International Conference on Computer Graphics, Imaging and Visualization, 2004. CGIV 2004. IEEE. 2004, pp. 70–75.  
