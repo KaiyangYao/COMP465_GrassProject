@@ -4,9 +4,9 @@ layout (triangle_strip, max_vertices = 36) out;
 
 out GS_OUT {
     vec2 textCoord;
-    float colorIndex;
     vec3 fragPos;
     vec3 fragNormal;
+    float colorIndex;
 } gs_out;
  
 uniform mat4 u_view;
@@ -15,9 +15,8 @@ uniform mat4 u_model;
 uniform vec3 u_cameraPosition;
 uniform float u_time;
 
-
-mat4 rotationY(in float angle);
 mat4 rotationX(in float angle);
+mat4 rotationY(in float angle);
 mat4 rotationZ(in float angle);
 float rand(vec2 co);
 
@@ -44,17 +43,15 @@ void createQuad(vec3 basePosition) {
     mat4 randomRotationMat = rotationY(randAngle);
 
     // Add Wind Effect
-    float windStrength = 2; // Set wind strength
-    float windFrequency = 20; // Set wind frequency
-    float windAngle = cos(radians(u_time * windFrequency))/(10/pi); // Set wind angle
-    vec3 windDirection = vec3(1.0, 0.0, 1.0); // Set wind direction
+    float windStrength = 2;
+    float windFrequency = 20;
+    float windAngle = cos(radians(u_time * windFrequency))/(10/pi);
+    vec3 windDirection = vec3(1.0, 0.0, 1.0);
     mat4 windTranslationMat =  (rotationX( windAngle *windDirection[0]) * rotationZ(windAngle * windDirection[2])); // Change the wind angle into matrix form
- 
-
 
 	for(int i = 0; i < 4; i++) {
 		mat4 windEffect = mat4(1.0);
-		if (i==2) windEffect = windTranslationMat; 
+		if (i == 2) windEffect = windTranslationMat; 
 	    vec4 worldPosition = gl_in[0].gl_Position + windEffect * randomRotationMat * (vertexPosition[i]) * randGrassSize;
         gl_Position = u_projection * u_view * worldPosition;
         gs_out.textCoord = textCoords[i];
@@ -106,9 +103,9 @@ void createGrass(int numQuads) {
 
 void main() {
 	// LOD distance definations
-	const float LOD1 = 1.0f;
-	const float LOD2 = 2.0f;
-	const float LOD3 = 4.0f;
+	const float LOD1 = 3.0f;
+	const float LOD2 = 6.0f;
+	const float LOD3 = 8.0f;
 
 	float dist = length(gl_in[0].gl_Position.xyz - u_cameraPosition);
 

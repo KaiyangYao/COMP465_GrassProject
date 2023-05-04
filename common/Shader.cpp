@@ -1,3 +1,7 @@
+/*
+* Reference: https://vulpinii.github.io/tutorials/grass-modelisation/en/
+*/
+
 #include <stdio.h>
 #include <string>
 #include <vector>
