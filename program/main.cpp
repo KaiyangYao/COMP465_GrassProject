@@ -1,3 +1,10 @@
+/*
+* Kaiyang Yao, Shengyuan Wang
+*
+* Reference: https://vulpinii.github.io/tutorials/grass-modelisation/en/
+* https://learnopengl.com/Advanced-OpenGL/Cubemaps
+*/
+
 // Include standard headers
 #include <chrono>
 #include <iostream>
@@ -45,16 +52,12 @@ float lastFrame = 0.0f;
 
 int textureCount = 0;
 
-// ****************************************
-// ****************************************
-// **               MAIN                 **
-// ****************************************
-// ****************************************
 int main(void) {
-  // ========================================
-  //           INITIALIZE OPENGL
-  // ========================================
-  // Initialise GLFW
+  /***************************************
+   * Initialization
+   ***************************************/
+
+  // Initialize GLFW
   if (!glfwInit()) {
     fprintf(stderr, "Failed to initialize GLFW\n");
     getchar();
@@ -64,10 +67,9 @@ int main(void) {
   glfwWindowHint(GLFW_SAMPLES, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // We don't want the old OpenGL
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  // Open a window and create its OpenGL context
   GLFWwindow *window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Grass Simulation!", NULL, NULL);
 
   glfwMakeContextCurrent(window);
@@ -77,7 +79,7 @@ int main(void) {
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
   // Initialize GLEW
-  glewExperimental = true; // Needed for core profile
+  glewExperimental = true;
   if (glewInit() != GLEW_OK) {
     fprintf(stderr, "Failed to initialize GLEW\n");
     getchar();
@@ -85,71 +87,54 @@ int main(void) {
     return -1;
   }
 
-  // background
+  // Initialize background
   glClearColor(0.215f, 0.215f, 0.215f, 1.0f);
   glfwSwapInterval(0);
   glEnable(GL_DEPTH_TEST);
 
+
   /***************************************
    * Grass
    ***************************************/
-  // Create Shader
-  // Create and compile our GLSL program from the shaders
-  GLuint shader = load_shaders("../../assets/shaders/grass.vs", "../../assets/shaders/grass.fs",
-                               "../../assets/shaders/grass.gs");
-  glUseProgram(shader);
-  // projection matrix
-  glm::mat4 projection =
-      glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
-  glUniformMatrix4fv(glGetUniformLocation(shader, "u_projection"), 1, GL_FALSE, &projection[0][0]);
-
-  // view transformation
+  GLuint grassShader =
+      load_shaders("../../assets/shaders/grass.vs", "../../assets/shaders/grass.fs",
+                   "../../assets/shaders/grass.gs");
+  glUseProgram(grassShader);
+  glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
+  glUniformMatrix4fv(glGetUniformLocation(grassShader, "u_projection"), 1, GL_FALSE, &projection[0][0]);
   glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-  glUniformMatrix4fv(glGetUniformLocation(shader, "u_view"), 1, GL_FALSE, &view[0][0]);
+  glUniformMatrix4fv(glGetUniformLocation(grassShader, "u_view"), 1, GL_FALSE, &view[0][0]);
 
-  // Create Positions
   std::vector<glm::vec3> positions;
-  // for (float x = -10.0f; x < 10.0f; x += 0.06f) {
-  //   for (float z = -10.0f; z < 10.0f; z += 0.06f) {
-  //     positions.push_back(glm::vec3(x, -1, z));
-  //   }
-  // }
-
-  // For Testing (Limit to 1*1)
-  for (float x = -2.0f ; x < 2.0f; x += 0.06f) {
-      for (float z = -2.0f; z < 2.0f; z += 0.06f) {
-          positions.push_back(glm::vec3(x, -1, z));
-      }
+  for (float x = -10.0f; x < 10.0f; x += 0.06f) {
+    for (float z = -10.0f; z < 10.0f; z += 0.06f) {
+      positions.push_back(glm::vec3(x, -1, z));
+    }
   }
-  
 
-  unsigned int VBO, VAO;
-  glGenVertexArrays(1, &VAO);
-  glBindVertexArray(VAO);
+  unsigned int grassVAO, grassVBO;
+  glGenVertexArrays(1, &grassVAO);
+  glBindVertexArray(grassVAO);
 
-  glGenBuffers(1, &VBO);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(glm::vec3), positions.data(),
-               GL_STATIC_DRAW);
+  glGenBuffers(1, &grassVBO);
+  glBindBuffer(GL_ARRAY_BUFFER, grassVBO);
+  glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(glm::vec3), positions.data(), GL_STATIC_DRAW);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glUseProgram(shader);
+  glUseProgram(grassShader);
 
   unsigned int grassTexture1 = loadTexture("../../assets/textures/grass.png");
-  glUniform1i(glGetUniformLocation(shader, "u_grassTexture1"), textureCount++);
+  glUniform1i(glGetUniformLocation(grassShader, "u_grassTexture1"), textureCount++);
+
 
   /***************************************
    * Land
    ***************************************/
   GLuint landShader = load_shaders("../../assets/shaders/land.vs", "../../assets/shaders/land.fs");
   glUseProgram(landShader);
-  glUniformMatrix4fv(glGetUniformLocation(landShader, "u_projection"), 1, GL_FALSE,
-                     &projection[0][0]);
+  glUniformMatrix4fv(glGetUniformLocation(landShader, "u_projection"), 1, GL_FALSE, &projection[0][0]);
   glUniformMatrix4fv(glGetUniformLocation(landShader, "u_view"), 1, GL_FALSE, &view[0][0]);
-
-  unsigned int landTexture = loadTexture("../../assets/textures/land3.png");
-  glUniform1i(glGetUniformLocation(landShader, "u_landTexture"), textureCount++);
 
   float landVertices[] = {
       // Vertices           // Textures
@@ -173,18 +158,21 @@ int main(void) {
   glBindBuffer(GL_ARRAY_BUFFER, landVBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(landVertices), landVertices, GL_STATIC_DRAW);
 
-  // position
+  // push position
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
-  // texture
+  // push texture
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
+
+  unsigned int landTexture = loadTexture("../../assets/textures/land.png");
+  glUniform1i(glGetUniformLocation(landShader, "u_landTexture"), textureCount++);
+
 
   /***************************************
    * Sky Box
    ***************************************/
-  GLuint skyboxShader =
-      load_shaders("../../assets/shaders/skybox.vs", "../../assets/shaders/skybox.fs");
+  GLuint skyboxShader = load_shaders("../../assets/shaders/skybox.vs", "../../assets/shaders/skybox.fs");
   glUseProgram(skyboxShader);
   glUniformMatrix4fv(glGetUniformLocation(skyboxShader, "u_projection"), 1, GL_FALSE,
                      &projection[0][0]);
@@ -210,10 +198,12 @@ int main(void) {
 
   unsigned int skyboxVAO, skyboxVBO;
   glGenVertexArrays(1, &skyboxVAO);
-  glGenBuffers(1, &skyboxVBO);
   glBindVertexArray(skyboxVAO);
+
+  glGenBuffers(1, &skyboxVBO);
   glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
 
@@ -227,30 +217,24 @@ int main(void) {
   unsigned int skyboxTexture = loadCubemap(faces);
 
 
-
-  /***************************************
-   * Wind Textures
-   ***************************************/
-  unsigned int windTexture = loadTexture("../../assets/textures/wind.png");
-  glUseProgram(shader);
-  glUniform1i(glGetUniformLocation(shader, "u_grassWindSim"), textureCount++);
-
   /***************************************
    * Bind Textures
    ***************************************/
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, grassTexture1);
-  // glBindTexture(GL_TEXTURE_2D, windTexture);
+  // For adding more grass/flower textures
+  // glActiveTexture(GL_TEXTURE1);
+  // glBindTexture(GL_TEXTURE_2D, grassTexture2);
   glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D, landTexture);
   glActiveTexture(GL_TEXTURE2);
   glBindTexture(GL_TEXTURE_2D, skyboxTexture);
-  
+
+
   /***************************************
    * Render Loop
    ***************************************/
-  glPointSize(5.0f);
-  do {
+  while (!glfwWindowShouldClose(window)) {
     float currentFrame = glfwGetTime();
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
@@ -278,36 +262,35 @@ int main(void) {
     glDepthFunc(GL_LESS); // set depth function back to default
 
     glUseProgram(landShader);
-    glUniformMatrix4fv(glGetUniformLocation(shader, "u_view"), 1, GL_FALSE, &view[0][0]);
-    glUniform3fv(glGetUniformLocation(shader, "u_cameraPosition"), 1, &cameraPos[0]);
+    glUniformMatrix4fv(glGetUniformLocation(grassShader, "u_view"), 1, GL_FALSE, &view[0][0]);
+    glUniform3fv(glGetUniformLocation(grassShader, "u_cameraPosition"), 1, &cameraPos[0]);
     glUniformMatrix4fv(glGetUniformLocation(landShader, "u_view"), 1, GL_FALSE, &view[0][0]);
     glUniform3fv(glGetUniformLocation(landShader, "u_cameraPosition"), 1, &cameraPos[0]);
     glBindVertexArray(landVAO);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-    glUseProgram(shader);
-    glUniform1f(glGetUniformLocation(shader, "u_time"), glfwGetTime()); 
-    glUniformMatrix4fv(glGetUniformLocation(shader, "u_view"), 1, GL_FALSE, &view[0][0]);
-    glUniform3fv(glGetUniformLocation(shader, "u_cameraPosition"), 1, &cameraPos[0]);
+    glUseProgram(grassShader);
+    glUniform1f(glGetUniformLocation(grassShader, "u_time"), glfwGetTime());
+    glUniformMatrix4fv(glGetUniformLocation(grassShader, "u_view"), 1, GL_FALSE, &view[0][0]);
+    glUniform3fv(glGetUniformLocation(grassShader, "u_cameraPosition"), 1, &cameraPos[0]);
     glUniformMatrix4fv(glGetUniformLocation(landShader, "u_view"), 1, GL_FALSE, &view[0][0]);
     glUniform3fv(glGetUniformLocation(landShader, "u_cameraPosition"), 1, &cameraPos[0]);
-    glBindVertexArray(VAO);
+    glBindVertexArray(grassVAO);
     glDrawArrays(GL_POINTS, 0, positions.size());
 
     // Swap buffers
     glfwSwapBuffers(window);
     glfwPollEvents();
 
-    // it's dirty but it's ok to keep it simple
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
-  } while (!glfwWindowShouldClose(window));
+  }
 
-  // ========================================
-  //              CLEAN UP
-  // ========================================
-  glDeleteVertexArrays(1, &VAO);
-  glDeleteBuffers(1, &VBO);
-  glDeleteProgram(shader);
+  /***************************************
+   * Clean Up
+   ***************************************/
+  glDeleteVertexArrays(1, &grassVAO);
+  glDeleteBuffers(1, &grassVBO);
+  glDeleteProgram(grassShader);
 
   glDeleteVertexArrays(1, &landVAO);
   glDeleteBuffers(1, &landVBO);
@@ -321,11 +304,10 @@ int main(void) {
   return 0;
 }
 
-// ****************************************
-// ****************************************
-// **          HELPER FUNCTIONS          **
-// ****************************************
-// ****************************************
+
+/***************************************
+ * Helper Functions
+ ***************************************/
 void processInput(GLFWwindow *window) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
