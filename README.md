@@ -77,3 +77,4 @@ We would like to express our sincere gratitude to Professor Bret Jackson for the
 [4] Neyret F Meyer A. “Interactive volumetric textures”. In: Eurographics Rendering Workshop (1998), pp. 157–168.  
 [5] Balu R. Reeves W. “Approximate and probabilistic algorithms from shading and rendering structured partical systems”. In: Computer Graphics 19.3 (1985), pp. 312–322.  
 [6] Changbo Wang et al. “Dynamic modeling and rendering of grass wagging in wind”. In: Computer Animation and Virtual Worlds 16.3-4 (2005), pp. 377–389.  
+[7] Vulpinii. 2020. Modeling Grass in 3D space. https://vulpinii.github.io/tutorials/grass-modelisation
